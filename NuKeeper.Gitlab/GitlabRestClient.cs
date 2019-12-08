@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -9,6 +10,7 @@ using System.Web;
 using Newtonsoft.Json;
 using NuKeeper.Abstractions;
 using NuKeeper.Abstractions.Logging;
+using NuKeeper.Gitlab.Model;
 
 namespace NuKeeper.Gitlab
 {
@@ -66,6 +68,24 @@ namespace NuKeeper.Gitlab
                 "application/json");
             return PostResource<Model.MergeRequest>($"projects/{encodedProjectName}/merge_requests", content);
         }
+
+        public async Task<IReadOnlyList<Model.Group>> GetAllGroups()
+        {
+            return await GetResource<List<Model.Group>>($"groups?all_available=true");
+        }
+
+        public async Task<IReadOnlyList<Model.Project>> GetProjectsForGroup(string groupName)
+        {
+            var encodedGroupName = HttpUtility.UrlEncode($"{groupName}");
+            return await GetResource<List<Model.Project>>($"groups/{encodedGroupName}/projects");
+        }
+
+        public async Task<Group> GetGroup(string groupName)
+        {
+            var encodedGroupName = HttpUtility.UrlEncode($"{groupName}");
+            return await GetResource<Group>($"groups/{encodedGroupName}");
+        }
+
 
         private async Task<T> GetResource<T>(string url, Func<HttpStatusCode, Result<T>> customErrorHandling = null, [CallerMemberName] string caller = null)
         {

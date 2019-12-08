@@ -58,16 +58,21 @@ namespace NuKeeper.Gitlab
             await _client.OpenMergeRequest(projectName, repositoryName, mergeRequest);
         }
 
-        public Task<IReadOnlyList<Organization>> GetOrganizations()
+        public async Task<IReadOnlyList<Organization>> GetOrganizations()
         {
-            _logger.Error("GitLab organizations have not yet been implemented.");
-            throw new NotImplementedException();
+            var groups = await _client.GetAllGroups();
+            _logger.Normal($"Read {groups.Count} groups");
+
+            return groups.Select(grp => new Organization(grp.Path ?? grp.Name)).ToList();
         }
 
-        public Task<IReadOnlyList<Repository>> GetRepositoriesForOrganisation(string projectName)
+        public async Task<IReadOnlyList<Repository>> GetRepositoriesForOrganisation(string organisationName)
         {
-            _logger.Error("GitLab organizations have not yet been implemented.");
-            throw new NotImplementedException();
+            var group = await _client.GetGroup(organisationName);
+            //var repos = await _client.GetProjectsForGroup(organisationName);
+
+            _logger.Normal($"Read {group.Projects.Count()} repos for org '{organisationName}'");
+            return group.Projects.Select(repo => new GitLabRepository(repo, group)).ToList();
         }
 
         public async Task<Repository> GetUserRepository(string userName, string repositoryName)

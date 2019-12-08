@@ -46,11 +46,15 @@ namespace NuKeeper.Gitlab
 
             // Assumption - url should look like https://gitlab.com/{username}/{projectname}.git";
             var path = repositoryUri.AbsolutePath;
-            var pathParts = path.Split('/')
+            var pathParts = path.Split(new []
+            {
+                '/'
+            }, 3)
+
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToList();
 
-            if (pathParts.Count != 2)
+            if (pathParts.Count < 2)
             {
                 throw new NuKeeperException(
                     $"The provided uri was is not in the correct format. Provided {repositoryUri} and format should be {UrlPattern}");
